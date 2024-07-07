@@ -4,56 +4,56 @@
 #include <sys/resource.h>
 
 // Função para calcular a pontuação máxima usando Programação Dinâmica
-int maxPointsDynamicProgramming(int N, int *sequence) {
+int maxPontosProgramacaoDinamica(int N, int *sequencia) {
     if (N == 0) return 0;
-    if (N == 1) return sequence[0];
+    if (N == 1) return sequencia[0];
     
     int *DP = (int *)malloc(N * sizeof(int));
-    DP[0] = sequence[0];
-    DP[1] = sequence[0] > sequence[1] ? sequence[0] : sequence[1];
+    DP[0] = sequencia[0];
+    DP[1] = sequencia[0] > sequencia[1] ? sequencia[0] : sequencia[1];
     
     for (int i = 2; i < N; i++) {
-        DP[i] = DP[i-1] > (sequence[i] + DP[i-2]) ? DP[i-1] : (sequence[i] + DP[i-2]);
+        DP[i] = DP[i-1] > (sequencia[i] + DP[i-2]) ? DP[i-1] : (sequencia[i] + DP[i-2]);
     }
     
-    int result = DP[N-1];
+    int resultado = DP[N-1];
     free(DP);
-    return result;
+    return resultado;
 }
 
 // Função para calcular a pontuação máxima usando a estratégia alternativa
-int maxPointsAlternative(int N, int *sequence) {
+int maxPontosAlternativa(int N, int *sequencia) {
     if (N == 0) return 0;
-    if (N == 1) return sequence[0];
+    if (N == 1) return sequencia[0];
     
-    int currentPoints = sequence[0];
-    int nextPoints = sequence[0] > sequence[1] ? sequence[0] : sequence[1];
+    int pontosAtuais = sequencia[0];
+    int pontosProximos = sequencia[0] > sequencia[1] ? sequencia[0] : sequencia[1];
     
     for (int i = 2; i < N; i++) {
-        int temp = nextPoints;
-        nextPoints = nextPoints > (sequence[i] + currentPoints) ? nextPoints : (sequence[i] + currentPoints);
-        currentPoints = temp;
+        int temp = pontosProximos;
+        pontosProximos = pontosProximos > (sequencia[i] + pontosAtuais) ? pontosProximos : (sequencia[i] + pontosAtuais);
+        pontosAtuais = temp;
     }
     
-    return nextPoints;
+    return pontosProximos;
 }
 
 // Função para medir o tempo de execução
-void measureTime(int (*func)(int, int*), int N, int *sequence) {
-    struct timeval start, end;
-    struct rusage usage;
+void medirTempo(int (*funcao)(int, int*), int N, int *sequencia) {
+    struct timeval inicio, fim;
+    struct rusage uso;
     
-    gettimeofday(&start, NULL);
-    func(N, sequence);
-    gettimeofday(&end, NULL);
+    gettimeofday(&inicio, NULL);
+    funcao(N, sequencia);
+    gettimeofday(&fim, NULL);
     
-    getrusage(RUSAGE_SELF, &usage);
+    getrusage(RUSAGE_SELF, &uso);
     
-    double userTime = (double)usage.ru_utime.tv_sec + (double)usage.ru_utime.tv_usec / 1000000.0;
-    double systemTime = (double)usage.ru_stime.tv_sec + (double)usage.ru_stime.tv_usec / 1000000.0;
+    double tempoUsuario = (double)uso.ru_utime.tv_sec + (double)uso.ru_utime.tv_usec / 1000000.0;
+    double tempoSistema = (double)uso.ru_stime.tv_sec + (double)uso.ru_stime.tv_usec / 1000000.0;
     
-    printf("User time: %lf\n", userTime);
-    printf("System time: %lf\n", systemTime);
+    printf("Tempo de usuário: %lf\n", tempoUsuario);
+    printf("Tempo de sistema: %lf\n", tempoSistema);
 }
 
 int main(int argc, char *argv[]) {
@@ -62,50 +62,50 @@ int main(int argc, char *argv[]) {
         return 1;
     }
     
-    char strategy = argv[1][0];
-    char *inputFile = argv[2];
+    char estrategia = argv[1][0];
+    char *arquivoEntrada = argv[2];
     
-    FILE *file = fopen(inputFile, "r");
-    if (!file) {
+    FILE *arquivo = fopen(arquivoEntrada, "r");
+    if (!arquivo) {
         perror("Erro ao abrir o arquivo");
         return 1;
     }
     
     int N;
-    fscanf(file, "%d", &N);
+    fscanf(arquivo, "%d", &N);
     
-    int *sequence = (int *)malloc(N * sizeof(int));
+    int *sequencia = (int *)malloc(N * sizeof(int));
     for (int i = 0; i < N; i++) {
-        fscanf(file, "%d", &sequence[i]);
+        fscanf(arquivo, "%d", &sequencia[i]);
     }
-    fclose(file);
+    fclose(arquivo);
     
-    int result;
-    if (strategy == 'D') {
-        result = maxPointsDynamicProgramming(N, sequence);
-    } else if (strategy == 'A') {
-        result = maxPointsAlternative(N, sequence);
+    int resultado;
+    if (estrategia == 'D') {
+        resultado = maxPontosProgramacaoDinamica(N, sequencia);
+    } else if (estrategia == 'A') {
+        resultado = maxPontosAlternativa(N, sequencia);
     } else {
         printf("Estratégia inválida. Use 'D' para Programação Dinâmica ou 'A' para alternativa.\n");
-        free(sequence);
+        free(sequencia);
         return 1;
     }
     
-    FILE *outputFile = fopen("saida.txt", "w");
-    if (!outputFile) {
+    FILE *arquivoSaida = fopen("saida.txt", "w");
+    if (!arquivoSaida) {
         perror("Erro ao abrir o arquivo de saída");
-        free(sequence);
+        free(sequencia);
         return 1;
     }
-    fprintf(outputFile, "%d\n", result);
-    fclose(outputFile);
+    fprintf(arquivoSaida, "%d\n", resultado);
+    fclose(arquivoSaida);
     
-    if (strategy == 'D') {
-        measureTime(maxPointsDynamicProgramming, N, sequence);
-    } else if (strategy == 'A') {
-        measureTime(maxPointsAlternative, N, sequence);
+    if (estrategia == 'D') {
+        medirTempo(maxPontosProgramacaoDinamica, N, sequencia);
+    } else if (estrategia == 'A') {
+        medirTempo(maxPontosAlternativa, N, sequencia);
     }
     
-    free(sequence);
+    free(sequencia);
     return 0;
 }
